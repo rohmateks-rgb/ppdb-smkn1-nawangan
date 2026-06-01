@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar Hadir PPDB SMKN 1 Nawangan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl p-6">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-blue-700">DAFTAR HADIR PESERTA DIDIK BARU</h1>
+      <h2 class="text-xl font-semibold mt-2">SMKN 1 NAWANGAN</h2>
+      <p class="text-gray-600">Tahun Ajaran 2026/2027</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-6">
+      <input id="nama" type="text" placeholder="Nama Peserta Didik" class="border rounded-xl p-3 w-full">
+      <select id="jk" class="border rounded-xl p-3 w-full">
+        <option value="">Pilih Jenis Kelamin</option>
+        <option>Laki-laki</option>
+        <option>Perempuan</option>
+      </select>
+
+      <input id="asal" type="text" placeholder="Asal Sekolah" class="border rounded-xl p-3 w-full">
+      <select id="jurusan" class="border rounded-xl p-3 w-full">
+        <option value="">Pilih Jurusan</option>
+        <option>ATPH</option>
+        <option>TKR</option>
+        <option>AKL</option>
+        <option>DPB</option>
+		<option>KKKR</option>
+      </select>
+
+      <input id="hp" type="text" placeholder="Nomor HP" class="border rounded-xl p-3 w-full">
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-6">
+      <button onclick="tambahData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold">
+        Tambah Data
+      </button>
+
+      <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold">
+        Export Excel
+      </button>
+
+      <button onclick="hapusSemua()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold">
+        Hapus Semua
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-blue-100">
+            <th class="border p-3">No</th>
+            <th class="border p-3">Nama</th>
+            <th class="border p-3">Jenis Kelamin</th>
+            <th class="border p-3">Asal Sekolah</th>
+            <th class="border p-3">Jurusan</th>
+            <th class="border p-3">No HP</th>
+            <th class="border p-3">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    let dataPeserta = JSON.parse(localStorage.getItem('ppdbData')) || [];
+
+    function simpanLocal() {
+      localStorage.setItem('ppdbData', JSON.stringify(dataPeserta));
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+
+      dataPeserta.forEach((item, index) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="border p-2 text-center">${index + 1}</td>
+            <td class="border p-2">${item.nama}</td>
+            <td class="border p-2">${item.jk}</td>
+            <td class="border p-2">${item.asal}</td>
+            <td class="border p-2">${item.jurusan}</td>
+            <td class="border p-2">${item.hp}</td>
+            <td class="border p-2 text-center">
+              <button onclick="hapusData(${index})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg">
+                Hapus
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function tambahData() {
+      const nama = document.getElementById('nama').value;
+      const jk = document.getElementById('jk').value;
+      const asal = document.getElementById('asal').value;
+      const jurusan = document.getElementById('jurusan').value;
+      const hp = document.getElementById('hp').value;
+
+      if (!nama || !jk || !asal || !jurusan || !hp) {
+        alert('Semua data wajib diisi!');
+        return;
+      }
+
+      dataPeserta.push({ nama, jk, asal, jurusan, hp });
+      simpanLocal();
+      renderTable();
+
+      document.getElementById('nama').value = '';
+      document.getElementById('jk').value = '';
+      document.getElementById('asal').value = '';
+      document.getElementById('jurusan').value = '';
+      document.getElementById('hp').value = '';
+    }
+
+    function hapusData(index) {
+      if (confirm('Yakin ingin menghapus data ini?')) {
+        dataPeserta.splice(index, 1);
+        simpanLocal();
+        renderTable();
+      }
+    }
+
+    function hapusSemua() {
+      if (confirm('Yakin ingin menghapus semua data?')) {
+        dataPeserta = [];
+        simpanLocal();
+        renderTable();
+      }
+    }
+
+    function exportExcel() {
+      const ws = XLSX.utils.json_to_sheet(dataPeserta);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'PPDB');
+      XLSX.writeFile(wb, 'Daftar_Hadir_PPDB_SMKN1_Nawangan.xlsx');
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
